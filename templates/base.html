@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Metaetiquetas y enlaces a Bootstrap -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Automata APP{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Asegurar que el cuerpo tenga altura completa */
+        body, html {
+            height: 100%;
+        }
+        #back-to-top {
+            display: none; /* Ocultar inicialmente */
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">Automata APP</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'index' %}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/regex_to_automata/' %}active{% endif %}" href="{% url 'regex_to_automata' %}">Regex a Autómata</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/draw_automata/' %}active{% endif %}" href="{% url 'draw_automata' %}">Dibujar Autómata</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido de la página -->
+    <main class="flex-grow-1">
+        {% block content %}
+        <!-- Simulación de contenido largo para probar el scroll -->
+        <div style="height: 1500px;">
+            <h1 class="text-center mt-5">Contenido de prueba</h1>
+        </div>
+        {% endblock %}
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="text-center py-4 mt-auto bg-light">
+        <p>&copy; {{ current_year }} Automata APP.</p>
+    </footer>
+
+    <!-- Botón "Volver arriba" -->
+    <a href="#" id="back-to-top" class="btn btn-outline-primary position-fixed bottom-0 end-0 m-4 align-items-center justify-content-center"
+       style="width: 50px; height: 50px;">
+        <i class="bi bi-arrow-up"></i>
+    </a>
+
+    <!-- Bootstrap Bundle con Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const backToTopButton = document.getElementById('back-to-top');
+
+            // Mostrar u ocultar el botón según el scroll
+            window.addEventListener('scroll', () => {
+                console.log('ScrollY:', window.scrollY); // Mostrar el valor del scroll para depurar
+                if (window.scrollY > 200) { // Ajusta este valor según el contenido
+                    backToTopButton.style.display = 'flex'; // Mostrar el botón
+                } else {
+                    backToTopButton.style.display = 'none'; // Ocultar el botón
+                }
+            });
+
+            // Manejar clic en el botón para volver arriba
+            backToTopButton.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevenir el comportamiento predeterminado
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>

@@ -20,6 +20,7 @@ from AUTOMATA_APP import views
 
 urlpatterns = [
     path('regex_to_automata/', views.regex_to_automata, name='regex_to_automata'),
+    path('draw_automata/', views.draw_automata, name='draw_automata'),
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
 ]

@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-zy*qz9m8ggoda&z1(ws*va^tz5_o3_+eq8jhros_1ocq&h&605'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['automataapp-production.up.railway.app', 'localhost']
 CSRF_TRUSTED_ORIGINS = ['https://automataapp-production.up.railway.app']
@@ -71,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'AUTOMATA_APP.context_processors.current_year',
             ],
         },
     },

@@ -1,95 +1,8 @@
-﻿<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Regex a Autómatas</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- MathJax para renderizar LaTeX -->
-    <script type="text/javascript" async
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js">
-    </script>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            color: #212529;
-        }
-        .container {
-            max-width: 900px;
-        }
-        .automata-container {
-            border: 1px solid #dee2e6;
-            margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
-        .zoomable {
-            width: 100%;
-            height: 500px;
-            overflow: hidden;
-            position: relative;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
-        .zoomable img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            cursor: grab;
-            transition: transform 0.3s ease;
-        }
-        .zoomable img:active {
-            cursor: grabbing;
-        }
-        .center-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1;
-        }
-        .form-control {
-            border-radius: 8px;
-        }
-        .form-label {
-            font-weight: bold;
-        }
-        h1 {
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
-        .table-responsive {
-            overflow-x: auto;
-        }
-        .alert-info p {
-            margin-bottom: 0;
-        }
-        /* Estilos para la Tabla de Pruebas */
-        #test-strings-table th, #test-strings-table td {
-            vertical-align: middle;
-        }
-        .btn-remove-row {
-            transition: background-color 0.3s ease;
-        }
-        .btn-remove-row:hover {
-            background-color: #dc3545;
-            color: #fff;
-        }
-        .btn-add-row {
-            transition: background-color 0.3s ease;
-        }
-        .btn-add-row:hover {
-            background-color: #198754;
-            color: #fff;
-        }
-    </style>
-</head>
-<body>
+﻿{% extends 'base.html' %}
+
+{% block title %}Regex a Autómatas{% endblock %}
+
+{% block content %}
     <div class="container my-5">
         <h1 class="text-center mb-4 text-primary">Conversor de Regex a Autómatas</h1>
 
@@ -387,5 +300,4 @@
             });
         });
     </script>
-</body>
-</html>
+{% endblock %}

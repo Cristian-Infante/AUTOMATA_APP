@@ -1,0 +1,35 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Dibujar Autómata - Conversor de Regex a Autómatas{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-4 text-primary">Dibujar Autómata</h1>
+    <!-- Formulario para ingresar el autómata -->
+    <form method="post" action="{% url 'draw_automata' %}" class="bg-white p-4 rounded shadow-sm">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="automata-input" class="form-label d-block fw-bold fs-5">
+                Ingrese la descripción del autómata:
+            </label>
+            <textarea name="automata_input" id="automata-input" class="form-control" rows="5" placeholder="Ingrese el autómata en formato específico..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center">
+            <i class="bi bi-gear-fill me-2"></i> Procesar Autómata
+        </button>
+    </form>
+
+    <!-- Mostrar resultados si existen -->
+    {% if automata_data %}
+    <div class="results mt-5">
+        <h2 class="text-center mb-4 text-secondary">Resultados</h2>
+        <!-- Aquí puedes mostrar la representación gráfica y la información del autómata -->
+        <div class="automata-info">
+            <p><strong>Descripción del Autómata:</strong></p>
+            <pre>{{ automata_data }}</pre>
+            <!-- Agrega más información y gráficos según sea necesario -->
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

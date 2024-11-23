@@ -1,10 +1,14 @@
-﻿from django.shortcuts import render
+﻿from datetime import datetime
+from lib2to3.fixes.fix_input import context
+
+from django.shortcuts import render
 from .forms import RegexForm
 from .automata import regex_to_nfa, remove_lambda_transitions, nfa_to_dfa, visualize_automata, reset_state_counter, regex_to_grammar, simulate_dfa
 from .language_description import generate_language_description
 
 def index(request):
-    return render(request, 'regex_to_automata.html')
+    current_year = datetime.now().year
+    return render(request, 'index.html', {'current_year': current_year})
 
 def regex_to_automata(request):
     if request.method == 'POST':
@@ -24,8 +28,8 @@ def regex_to_automata(request):
             dfa_graph = visualize_automata(dfa)
 
             automata_list = [
-                ('AFN-λ', nfa_lambda_graph, 'nfa_lambda'),
-                ('AFN', nfa_no_lambda_graph, 'nfa_no_lambda'),
+                ('AFND-λ', nfa_lambda_graph, 'nfa_lambda'),
+                ('AFND', nfa_no_lambda_graph, 'nfa_no_lambda'),
                 ('AFD', dfa_graph, 'dfa')
             ]
 
@@ -68,3 +72,19 @@ def regex_to_automata(request):
     else:
         form = RegexForm()
     return render(request, 'regex_to_automata.html', {'form': form})
+
+
+def draw_automata(request):
+    # Nueva vista para dibujar el autómata y mostrar información
+    # Puedes replicar la lógica de 'regex_to_automata' o ajustarla según tus necesidades
+    if request.method == 'POST':
+        # Procesar los datos enviados por el usuario
+        # ...
+        context = {
+            # Variables que se enviarán al template
+            # ...
+        }
+        return render(request, 'draw_automata.html', context)
+    else:
+        # Mostrar el formulario inicial
+        return render(request, 'draw_automata.html')
