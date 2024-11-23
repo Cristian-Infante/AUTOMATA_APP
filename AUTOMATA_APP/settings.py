@@ -27,7 +27,12 @@ SECRET_KEY = 'django-insecure-zy*qz9m8ggoda&z1(ws*va^tz5_o3_+eq8jhros_1ocq&h&605
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['.railway.app']
+ALLOWED_HOSTS = ['automataapp-production.up.railway.app', 'localhost']
+CSRF_TRUSTED_ORIGINS = ['https://automataapp-production.up.railway.app']
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 
 # Application definition
