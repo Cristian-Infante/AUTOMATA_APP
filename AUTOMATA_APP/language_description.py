@@ -375,3 +375,53 @@ def generate_language_description(regex):
     except Exception as e:
         # En caso de error, devolver una descripción genérica
         return rf"L = \{{ x \in \Sigma^* \mid x \text{{ cumple la expresión regular }} \texttt{{ {regex} }} \}}"
+
+def determine_grammar_type(N, T, P):
+    """
+    Determina el tipo de la gramática basada en sus producciones.
+    Retorna una cadena indicando el tipo de gramática.
+    """
+    grammar_type = 3  # Asumimos inicialmente que es una Gramática Regular (Tipo 3)
+
+    for variable, production in P:
+        # Verificamos que el lado izquierdo sea un único no terminal
+        if variable not in N:
+            # Si el lado izquierdo no es un no terminal, es al menos de Tipo 1
+            grammar_type = min(grammar_type, 1)
+            continue
+
+        # Analizamos el lado derecho de la producción
+        if production == '':
+            # Producción épsilon, permitida en gramáticas regulares
+            continue
+
+        symbols = list(production)
+
+        if len(symbols) == 1:
+            if symbols[0] in T or symbols[0] in N:
+                # A -> a (terminal) o A -> B (no terminal)
+                continue
+            else:
+                # Símbolo desconocido, al menos Tipo 1
+                grammar_type = min(grammar_type, 1)
+        elif len(symbols) == 2:
+            if (symbols[0] in T and symbols[1] in N) or (symbols[0] in N and symbols[1] in T):
+                # A -> aB (derecha-lineal) o A -> Ba (izquierda-lineal)
+                continue
+            else:
+                # No cumple con las formas de gramáticas regulares
+                grammar_type = min(grammar_type, 2)
+        else:
+            # Producciones con más de dos símbolos en el lado derecho
+            grammar_type = min(grammar_type, 2)
+
+    # Determinar el tipo final de la gramática
+    if grammar_type == 3:
+        return "Tipo 3 (Gramática Regular)"
+    elif grammar_type == 2:
+        return "Tipo 2 (Gramática Libre de Contexto)"
+    elif grammar_type == 1:
+        return "Tipo 1 (Gramática Sensible al Contexto)"
+    else:
+        return "Tipo 0 (Gramática No Restringida)"
+

@@ -4,7 +4,7 @@ from lib2to3.fixes.fix_input import context
 from django.shortcuts import render
 from .forms import RegexForm
 from .automata import regex_to_nfa, remove_lambda_transitions, nfa_to_dfa, visualize_automata, reset_state_counter, regex_to_grammar, simulate_dfa
-from .language_description import generate_language_description
+from .language_description import generate_language_description, determine_grammar_type
 
 def index(request):
     current_year = datetime.now().year
@@ -37,16 +37,15 @@ def regex_to_automata(request):
             initial_variable, N, T, P = regex_to_grammar(nfa_lambda)
 
             # Manejar cadenas de prueba
-            test_strings = request.POST.get('test_strings', '')
+            test_strings = request.POST.getlist('test_strings')
+
             test_results = []
-            if test_strings:
-                test_strings_list = test_strings.strip().split('\n')
-                for s in test_strings_list:
-                    s = s.strip()
-                    if s == '':
-                        continue
-                    is_accepted = simulate_dfa(dfa, s)
-                    test_results.append((s, is_accepted))
+            for s in test_strings:
+                s = s.strip()
+                if s == '':
+                    continue
+                is_accepted = simulate_dfa(dfa, s)
+                test_results.append((s, is_accepted))
 
             # Agrupar producciones por variable
             productions_grouped = {}
@@ -57,6 +56,7 @@ def regex_to_automata(request):
 
             # Preparar la expresión formal del lenguaje aceptado
             language_description = generate_language_description(regex)
+            grammar_type = determine_grammar_type(N, T, P)
 
             context = {
                 'form': form,
@@ -66,7 +66,8 @@ def regex_to_automata(request):
                 'terminals': T,
                 'productions_grouped': productions_grouped,
                 'language_description': language_description,
-                'test_results': test_results
+                'test_results': test_results,
+                'grammar_type': grammar_type
             }
             return render(request, 'regex_to_automata.html', context)
     else:

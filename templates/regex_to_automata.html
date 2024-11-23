@@ -34,22 +34,46 @@
                     <tbody>
                         <!-- Símbolo Inicial -->
                         <tr>
-                            <td><strong>Variable Inicial (S)</strong></td>
+                            <td>
+                                <strong>
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Variable de inicio de la gramática">
+                                        Variable Inicial (S)
+                                    </span>
+                                </strong>
+                            </td>
                             <td class="text-center">{{ initial_variable }}</td>
                         </tr>
                         <!-- No Terminales -->
                         <tr>
-                            <td><strong>Símbolos No Terminales (N)</strong></td>
+                            <td>
+                                <strong>
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Conjunto de símbolos no terminales de la gramática">
+                                        Símbolos No Terminales (N)
+                                    </span>
+                                </strong>
+                            </td>
                             <td class="text-center">{{ non_terminals|join:", " }}</td>
                         </tr>
                         <!-- Terminales -->
                         <tr>
-                            <td><strong>Símbolos Terminales (T)</strong></td>
+                            <td>
+                                <strong>
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Conjunto de símbolos terminales (alfabeto) de la gramática">
+                                        Símbolos Terminales (T)
+                                    </span>
+                                </strong>
+                            </td>
                             <td class="text-center">{{ terminals|join:", " }}</td>
                         </tr>
                         <!-- Producciones -->
                         <tr>
-                            <td><strong>Producciones (P)</strong></td>
+                            <td>
+                                <strong>
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Reglas de producción que definen cómo los símbolos se pueden transformar">
+                                        Producciones (P)
+                                    </span>
+                                </strong>
+                            </td>
                             <td class="text-center">
                                 <ul class="list-unstyled mb-0">
                                     {% for variable, productions in productions_grouped.items %}
@@ -58,9 +82,28 @@
                                 </ul>
                             </td>
                         </tr>
+                        <!-- Tipo de Gramática -->
+                        <tr>
+                            <td>
+                                <strong>
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Tipo de la gramática según la jerarquía de Chomsky">
+                                        Tipo de Gramática
+                                    </span>
+                                </strong>
+                            </td>
+                            <td class="text-center">
+                                {{ grammar_type }}
+                            </td>
+                        </tr>
                         <!-- Descripción Formal del Lenguaje -->
                         <tr>
-                            <td><strong>Descripción Formal del Lenguaje</strong></td>
+                            <td>
+                                <strong>
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Descripción matemática del lenguaje aceptado por la expresión regular">
+                                        Descripción Formal del Lenguaje
+                                    </span>
+                                </strong>
+                            </td>
                             <td class="text-center">
                                 \[ {{ language_description|safe }} \]
                             </td>
@@ -76,7 +119,11 @@
         <div class="results">
             {% for automata_title, automata_graph, automata_id in automata_list %}
             <div class="automata-container">
-                <h3 class="text-center mb-3 text-secondary">{{ automata_title }}</h3>
+                <h3 class="text-center mb-3 text-secondary">
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="{% if automata_title == 'AFND-λ' %}Autómata Finito No Determinista con Transiciones Lambda{% elif automata_title == 'AFND' %}Autómata Finito No Determinista{% elif automata_title == 'AFD' %}Autómata Finito Determinista{% endif %}">
+                        {{ automata_title }}
+                    </span>
+                </h3>
                 <button class="btn btn-outline-secondary center-button" onclick="resetZoom('{{ automata_id }}')">
                     Restablecer Zoom
                 </button>
@@ -96,111 +143,91 @@
             <h2 class="text-center mb-4 text-primary">Probar Cadenas</h2>
             <form method="post" action="{% url 'regex_to_automata' %}" class="bg-white p-4 rounded shadow-sm">
                 {% csrf_token %}
-                <div class="mb-4">
-                    <label for="test-strings-table" class="form-label d-block fw-bold text-center fs-5">
-                        Ingrese las cadenas a probar:
-                    </label>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-striped table-bordered" id="test-strings-table">
-                            <thead class="table-secondary">
+                <div class="table-responsive d-flex justify-content-center">
+                    <table class="table table-bordered text-center align-middle" id="test-strings-table" style="max-width: 600px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cadenas de Prueba</th>
+                                <th>Resultado</th>
+                                <th style="width: 15%;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if test_results %}
+                                {% for string, is_accepted in test_results %}
                                 <tr>
-                                    <th>Cadenas de Prueba</th>
-                                    <th>Resultado</th>
-                                    <th class="text-center" style="width: 10%;">Acción</th>
+                                    <td>
+                                        <input type="text" name="test_strings" class="form-control bg-light text-center" value="{{ string }}" readonly>
+                                    </td>
+                                    <td class="{% if is_accepted %}text-success fw-bold{% else %}text-danger fw-bold{% endif %}">
+                                        {% if is_accepted %}
+                                        Aceptada
+                                        {% else %}
+                                        Rechazada
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar esta fila">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% if test_results %}
-                                    {% for string, is_accepted in test_results %}
-                                    <tr>
-                                        <td>
-                                            <input type="text" name="test_strings" class="form-control form-control-lg" value="{{ string }}" readonly>
-                                        </td>
-                                        <td class="text-center">
-                                            {% if is_accepted %}
-                                            <span class="badge bg-success">Aceptada</span>
-                                            {% else %}
-                                            <span class="badge bg-danger">Rechazada</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-danger btn-sm remove-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <!-- Fila de ejemplo (puedes eliminarla si no deseas una fila predeterminada) -->
-                                    <tr>
-                                        <td>
-                                            <input type="text" name="test_strings" class="form-control form-control-lg" placeholder="Ingrese una cadena..." required>
-                                        </td>
-                                        <td class="text-center">
-                                            <!-- Resultado vacío inicialmente -->
-                                        </td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-danger btn-sm remove-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <button type="button" class="btn btn-success btn-sm" id="add-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Agregar Fila">
-                        <i class="bi bi-plus-lg"></i> Agregar Fila
-                    </button>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td>
+                                        <input type="text" name="test_strings" class="form-control text-center" placeholder="Ingrese una cadena..." required>
+                                    </td>
+                                    <td>
+                                        <!-- Vacío inicialmente -->
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar esta fila">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            <!-- Fila del botón "Agregar Fila" -->
+                            <tr id="add-row-container">
+                                <td colspan="3" class="text-center">
+                                    <button type="button" class="btn btn-success btn-sm" id="add-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Agregar Fila">
+                                        <i class="bi bi-plus-circle me-2"></i> Agregar Fila
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <!-- Campo oculto para mantener la expresión regular original -->
                 <input type="hidden" name="regex" value="{{ form.regex.value|default:'' }}">
-                <button type="submit" class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center">
-                    <i class="bi bi-check2-circle me-2"></i> Probar Cadenas
-                </button>
+                <div class="d-flex justify-content-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle me-2"></i> Probar Cadenas
+                    </button>
+                </div>
             </form>
         </div>
         {% endif %}
-
-        <!-- Mostrar Resultados de las Pruebas (opcional, ya integrados en la tabla) -->
-        <!--
-        {% if test_results %}
-        <div class="test-results my-5">
-            <h2 class="text-center mb-4 text-primary">Resultados de las Pruebas</h2>
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                    <thead class="table-primary text-center">
-                        <tr>
-                            <th>Cadena</th>
-                            <th>Resultado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for string, is_accepted in test_results %}
-                        <tr>
-                            <td class="text-center">{{ string }}</td>
-                            <td class="text-center">
-                                {% if is_accepted %}
-                                <span class="badge bg-success">Aceptada</span>
-                                {% else %}
-                                <span class="badge bg-danger">Rechazada</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        {% endif %}
-        -->
-
     </div>
 
     <!-- Bootstrap Bundle con Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Panzoom JS -->
     <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.4.0/dist/panzoom.min.js"></script>
+    <!-- MathJax para renderizar LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
     <script>
         // Inicializar Tooltips de Bootstrap
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -239,7 +266,7 @@
             const addRowButton = document.getElementById('add-row');
             const tableBody = document.querySelector('#test-strings-table tbody');
 
-            // Función para agregar una nueva fila
+            // Función para agregar una nueva fila antes de la fila del botón "Agregar Fila"
             addRowButton.addEventListener('click', function() {
                 const newRow = document.createElement('tr');
 
@@ -248,7 +275,7 @@
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.name = 'test_strings';
-                input.classList.add('form-control', 'form-control-lg');
+                input.classList.add('form-control', 'text-center');
                 input.placeholder = 'Ingrese una cadena...';
                 input.required = true;
                 inputCell.appendChild(input);
@@ -257,7 +284,6 @@
                 // Celda para el resultado (vacío inicialmente)
                 const resultCell = document.createElement('td');
                 resultCell.classList.add('text-center');
-                // No se añade contenido inicialmente
                 newRow.appendChild(resultCell);
 
                 // Celda para el botón de eliminar
@@ -265,37 +291,30 @@
                 actionCell.classList.add('text-center');
                 const removeButton = document.createElement('button');
                 removeButton.type = 'button';
-                removeButton.classList.add('btn', 'btn-danger', 'btn-sm', 'remove-row');
+                removeButton.classList.add('btn', 'btn-outline-danger', 'btn-sm', 'remove-row');
                 removeButton.setAttribute('data-bs-toggle', 'tooltip');
                 removeButton.setAttribute('data-bs-placement', 'top');
-                removeButton.setAttribute('title', 'Eliminar');
+                removeButton.setAttribute('title', 'Eliminar esta fila');
                 removeButton.innerHTML = '<i class="bi bi-trash"></i>';
                 actionCell.appendChild(removeButton);
                 newRow.appendChild(actionCell);
 
-                tableBody.appendChild(newRow);
+                // Insertar la nueva fila antes de la fila del botón "Agregar Fila"
+                const addRowContainer = document.getElementById('add-row-container');
+                tableBody.insertBefore(newRow, addRowContainer);
 
                 // Re-inicializar Tooltips
-                var tooltipTriggerList = [].slice.call(newRow.querySelectorAll('[data-bs-toggle="tooltip"]'))
-                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                  return new bootstrap.Tooltip(tooltipTriggerEl)
-                })
+                var tooltipTriggerList = [].slice.call(newRow.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
             });
 
             // Función para eliminar una fila
             tableBody.addEventListener('click', function(event) {
                 if (event.target && event.target.closest('.remove-row')) {
                     const row = event.target.closest('tr');
-                    // Evitar eliminar la última fila si así lo deseas
-                    if (tableBody.rows.length > 1) {
-                        row.remove();
-                    } else {
-                        // Opcional: Limpiar el input en lugar de eliminar la fila
-                        const input = row.querySelector('input[name="test_strings"]');
-                        input.value = '';
-                        const resultCell = row.querySelector('td:nth-child(2)');
-                        resultCell.innerHTML = '';
-                    }
+                    row.remove();
                 }
             });
         });
