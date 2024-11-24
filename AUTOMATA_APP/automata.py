@@ -3,6 +3,11 @@ import base64
 import string
 from graphviz import Digraph
 
+class NFA:
+    def __init__(self, start_state, accept_states):
+        self.start_state = start_state
+        self.accept_states = accept_states
+
 class State:
     _id = 0
 
@@ -23,6 +28,13 @@ class State:
             if symbol not in self.transitions:
                 self.transitions[symbol] = set()
             self.transitions[symbol].add(state)
+
+    @staticmethod
+    def reset_state_counter():
+        """
+        Reinicia el contador global de IDs de estados.
+        """
+        State._id = 0
 
 def reset_state_counter():
     State._id = 0
@@ -427,3 +439,26 @@ def simulate_dfa(dfa, input_string):
         else:
             return False
     return current_state.is_final
+
+def dfa_to_grammar(dfa):
+    # Obtener todos los estados del DFA
+    states = get_all_states(dfa.start_state)
+    N = set(state.name for state in states)
+    T = set()
+    P = []
+
+    for state in states:
+        variable = state.name
+        for symbol, next_states in state.transitions.items():
+            T.add(symbol)
+            for next_state in next_states:
+                production = (variable, symbol + next_state.name)
+                P.append(production)
+
+        # Si el estado es final, agregar producción a λ
+        if state.is_final:
+            P.append((variable, 'λ'))
+
+    initial_variable = dfa.start_state.name
+
+    return initial_variable, N, T, P

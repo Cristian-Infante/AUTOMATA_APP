@@ -1,35 +1,977 @@
 ﻿{% extends 'base.html' %}
 
-{% block title %}Dibujar Autómata - Conversor de Regex a Autómatas{% endblock %}
+{% block title %}Dibujar Autómata{% endblock %}
 
+{% block main_content %}
+<main class="flex-grow-1 d-flex flex-column">
 {% block content %}
-<div class="container my-5">
-    <h1 class="text-center mb-4 text-primary">Dibujar Autómata</h1>
-    <!-- Formulario para ingresar el autómata -->
-    <form method="post" action="{% url 'draw_automata' %}" class="bg-white p-4 rounded shadow-sm">
-        {% csrf_token %}
-        <div class="mb-4">
-            <label for="automata-input" class="form-label d-block fw-bold fs-5">
-                Ingrese la descripción del autómata:
-            </label>
-            <textarea name="automata_input" id="automata-input" class="form-control" rows="5" placeholder="Ingrese el autómata en formato específico..."></textarea>
+    <div class="container my-5 flex-grow-1 d-flex flex-column">
+        <h1 class="text-center mb-4 text-primary">Dibujar Autómata</h1>
+    
+        <!-- Barra de herramientas dentro de una tarjeta -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body d-flex flex-wrap justify-content-center toolbar">
+                <button type="button" class="btn btn-outline-primary mx-2 my-1" id="add-state-btn">
+                    <i class="bi bi-circle"></i> Agregar Estado
+                </button>
+                <button type="button" class="btn btn-outline-primary mx-2 my-1" id="add-transition-btn">
+                    <i class="bi bi-arrow-right"></i> Agregar Transición
+                </button>
+                <button type="button" class="btn btn-outline-primary mx-2 my-1" id="select-initial-btn">
+                    <i class="bi bi-play-fill"></i> Estado Inicial
+                </button>
+                <button type="button" class="btn btn-outline-primary mx-2 my-1" id="toggle-accepting-btn">
+                    <i class="bi bi-check-circle"></i> Estado de Aceptación
+                </button>
+                <button type="button" class="btn btn-outline-danger mx-2 my-1" id="delete-element-btn">
+                    <i class="bi bi-trash"></i> Eliminar
+                </button>
+                <button type="button" class="btn btn-outline-secondary mx-2 my-1" id="move-element-btn">
+                    <i class="bi bi-arrows-move"></i> Mover
+                </button>
+                <button type="button" class="btn btn-outline-danger mx-2 my-1" id="clear-board-btn">
+                    <i class="bi bi-trash3"></i> Limpiar Tablero
+                </button>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center">
+    
+        <!-- Contenedor del lienzo -->
+        <div id="paper-container" class="shadow-sm mb-4 rounded flex-grow-1" style="border: 1px solid #ccc; background-color: #f8f9fa;"></div>
+    
+        <!-- Botón para procesar el autómata -->
+        <button id="process-automata" class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center">
             <i class="bi bi-gear-fill me-2"></i> Procesar Autómata
         </button>
-    </form>
-
-    <!-- Mostrar resultados si existen -->
-    {% if automata_data %}
-    <div class="results mt-5">
-        <h2 class="text-center mb-4 text-secondary">Resultados</h2>
-        <!-- Aquí puedes mostrar la representación gráfica y la información del autómata -->
-        <div class="automata-info">
-            <p><strong>Descripción del Autómata:</strong></p>
-            <pre>{{ automata_data }}</pre>
-            <!-- Agrega más información y gráficos según sea necesario -->
+    
+        <!-- Sección para mostrar resultados -->
+        <div id="results-section" class="mt-4" style="display: none;">
+            <div class="grammar-container my-5 p-4 bg-light rounded shadow-sm">
+                <h2 class="text-center mb-4 text-primary">Gramática Regular Correspondiente</h2>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped text-center align-middle">
+                        <tbody>
+                            <!-- Variable Inicial -->
+                            <tr>
+                                <td class="fw-bold align-middle">
+                                    <strong>
+                                        <span data-bs-toggle="tooltip" title="Variable de inicio de la gramática">
+                                            Variable Inicial (S)
+                                        </span>
+                                    </strong>
+                                </td>
+                                <td class="text-center" id="initial-variable"></td>
+                            </tr>
+                            <!-- No Terminales -->
+                            <tr>
+                                <td class="fw-bold align-middle">
+                                    <strong>
+                                        <span data-bs-toggle="tooltip" title="Conjunto de símbolos no terminales de la gramática">
+                                            Símbolos No Terminales (N)
+                                        </span>
+                                    </strong>
+                                </td>
+                                <td class="text-center" id="non-terminals"></td>
+                            </tr>
+                            <!-- Terminales -->
+                            <tr>
+                                <td class="fw-bold align-middle">
+                                    <strong>
+                                        <span data-bs-toggle="tooltip" title="Conjunto de símbolos terminales (alfabeto) de la gramática">
+                                            Símbolos Terminales (T)
+                                        </span>
+                                    </strong>
+                                </td>
+                                <td class="text-center" id="terminals"></td>
+                            </tr>
+                            <!-- Producciones -->
+                            <tr>
+                                <td class="fw-bold align-middle">
+                                    <strong>
+                                        <span data-bs-toggle="tooltip" title="Reglas de producción que definen cómo los símbolos se pueden transformar">
+                                            Producciones (P)
+                                        </span>
+                                    </strong>
+                                </td>
+                                <td class="align-middle" id="productions">
+                                    <!-- Las producciones se insertarán aquí -->
+                                </td>
+                            </tr>
+                            <!-- Tipo de Gramática -->
+                            <tr>
+                                <td class="fw-bold align-middle">
+                                    <strong>
+                                        <span data-bs-toggle="tooltip" title="Tipo de la gramática según la jerarquía de Chomsky">
+                                            Tipo de Gramática
+                                        </span>
+                                    </strong>
+                                </td>
+                                <td class="text-center" id="grammar-type"></td>
+                            </tr>
+                            <!-- Descripción Formal del Lenguaje -->
+                            {% comment %}<tr>
+                                <td class="fw-bold align-middle">
+                                    <strong>
+                                        <span data-bs-toggle="tooltip" title="Descripción matemática del lenguaje aceptado por la expresión regular">
+                                            Descripción Formal del Lenguaje
+                                        </span>
+                                    </strong>
+                                </td>
+                                <td class="text-center" id="language-description">
+                                    <!-- La descripción formal se insertará aquí -->
+                                </td>
+                            </tr>{% endcomment %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+                
+            <!-- Probar Cadenas --><!-- Sección para Probar Cadenas -->
+            <div class="test-strings-form my-5" id="test-strings-section" style="display: none;">
+                <h2 class="text-center mb-4 text-primary">Probar Cadenas</h2>
+                <form id="test-strings-form" class="bg-white p-4 rounded shadow-sm">
+                    <div class="table-responsive d-flex justify-content-center">
+                        <table class="table table-bordered text-center align-middle" id="test-strings-table" style="max-width: 600px;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Cadenas de Prueba</th>
+                                    <th>Resultado</th>
+                                    <th style="width: 15%;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Fila inicial vacía -->
+                                <tr>
+                                    <td>
+                                        <input type="text" name="test_strings" class="form-control text-center" placeholder="Ingrese una cadena..." required>
+                                    </td>
+                                    <td>
+                                        <!-- Vacío inicialmente -->
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar esta fila">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!-- Fila del botón "Agregar Fila" -->
+                                <tr id="add-row-container">
+                                    <td colspan="3" class="text-center">
+                                        <button type="button" class="btn btn-success btn-sm" id="add-row" data-bs-toggle="tooltip" data-bs-placement="top" title="Agregar Fila">
+                                            <i class="bi bi-plus-circle me-2"></i> Agregar Fila
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-center mt-4">
+                        <button type="button" class="btn btn-primary btn-lg" id="submit-test-strings">
+                            <i class="bi bi-check-circle me-2"></i> Probar Cadenas
+                        </button>
+                    </div>
+                </form>
+                <!-- Resultados se mostrarán aquí -->
+                <div id="test-results" class="mt-3">
+                    <!-- Los resultados se agregarán aquí -->
+                </div>
+            </div>
         </div>
     </div>
-    {% endif %}
-</div>
+        
+    <!-- Modal para Solicitar Símbolo de Nueva Transición -->
+    <div class="modal fade" id="addTransitionModal" tabindex="-1" aria-labelledby="addTransitionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-primary" id="addTransitionModalLabel">Agregar Transición</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="new-transition-symbol" class="form-label">Símbolo de la Transición</label>
+                        <input type="text" id="new-transition-symbol" class="form-control" maxlength="1" placeholder="Ingrese el símbolo">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="save-new-transition-btn">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+    <!-- Modal para Confirmación de Limpieza -->
+    <div class="modal fade" id="confirmClearModal" tabindex="-1" aria-labelledby="confirmClearModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="confirmClearModalLabel">Confirmación de Limpieza</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas limpiar el tablero? Se eliminarán todos los estados y transiciones.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirm-clear-btn">Limpiar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para editar el símbolo de una transición -->
+    <div class="modal fade" id="editTransitionModal" tabindex="-1" aria-labelledby="editTransitionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-primary" id="editTransitionModalLabel">Editar Transición</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="transition-symbol" class="form-label">Nuevo Símbolo</label>
+                        <input type="text" id="transition-symbol" class="form-control" maxlength="1" placeholder="Ingrese el símbolo">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="save-transition-btn">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+    <style>
+        main.flex-grow-1 {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 100px);
+        }
+    
+        #paper-container {
+            flex-grow: 1;
+            min-height: 500px; /* Ajusta según tus necesidades */
+            height: auto;
+            display: block;
+        }
+    
+        .container.my-5 {
+            flex-grow: 1; /* Asegura que el contenido pueda expandirse */
+        }
+    
+        #results-section {
+            flex-grow: 0;
+        }
+    </style>
+    
+    <!-- Scripts necesarios -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.4.0/backbone-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jointjs/3.6.5/joint.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+ 
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar el gráfico y el papel
+            var graph = new joint.dia.Graph();
+    
+            var paper = new joint.dia.Paper({
+                el: document.getElementById('paper-container'),
+                model: graph,
+                width: '100%',
+                height: '100%',
+                gridSize: 10,
+                drawGrid: true,
+                background: {
+                    color: '#f8f9fa'
+                },
+                defaultLink: new joint.shapes.standard.Link({
+                    attrs: {
+                        line: {
+                            stroke: 'black',
+                            strokeWidth: 2,
+                            sourceMarker: null,
+                            targetMarker: {
+                                'type': 'path',
+                                'd': 'M 10 -5 0 0 10 5 z'
+                            }
+                        }
+                    }
+                }),
+                interactive: function(cellView) {
+                    if (cellView.model.isLink()) {
+                        return { vertexAdd: false };
+                    }
+                    return true;
+                }
+            });
+    
+            // Variables para manejar el estado inicial y los estados de aceptación
+            var initialState = null;
+            var acceptingStates = [];
+            var currentAction = null;
+            var selectedElement = null;
+            var transitionSource = null;
+    
+            // Función para restablecer la selección
+            function resetSelection() {
+                if (selectedElement) {
+                    // Restablecer el color del estado seleccionado
+                    selectedElement.attr('body/stroke', 'black');
+                }
+                if (transitionSource) {
+                    transitionSource.attr('body/stroke', 'black'); // Quitar estilo visual
+                    transitionSource = null; // Reiniciar fuente de la transición
+                }
+                selectedElement = null;
+                paper.el.style.cursor = 'default';
+                currentAction = null;
+                // Remover la clase 'active' de todos los botones
+                $('.toolbar .btn').removeClass('active');
+            }
+    
+            // Manejo de botones de la barra de herramientas
+            $('#add-state-btn').on('click', function() {
+                resetSelection();
+                currentAction = 'addState';
+                paper.el.style.cursor = 'crosshair';
+                $(this).addClass('active');
+            });
+    
+            $('#add-transition-btn').on('click', function() {
+                resetSelection();
+                currentAction = 'addTransition';
+                paper.el.style.cursor = 'crosshair';
+                $(this).addClass('active');
+            });
+    
+            $('#select-initial-btn').on('click', function() {
+                resetSelection();
+                currentAction = 'selectInitial';
+                paper.el.style.cursor = 'pointer';
+                $(this).addClass('active');
+            });
+    
+            $('#toggle-accepting-btn').on('click', function() {
+                resetSelection();
+                currentAction = 'toggleAccepting';
+                paper.el.style.cursor = 'pointer';
+                $(this).addClass('active');
+            });
+    
+            $('#delete-element-btn').on('click', function() {
+                resetSelection();
+                currentAction = 'deleteElement';
+                paper.el.style.cursor = 'not-allowed';
+                $(this).addClass('active');
+            });
+    
+            $('#move-element-btn').on('click', function() {
+                resetSelection();
+                currentAction = 'moveElement';
+                paper.el.style.cursor = 'move';
+                $(this).addClass('active');
+            });
+            
+            // Manejo de limpieza de tablero
+            $('#clear-board-btn').on('click', function () {
+                $('#confirmClearModal').modal('show');
+            });
+    
+            $('#confirm-clear-btn').on('click', function () {
+                graph.clear();
+                initialState = null;
+                acceptingStates = [];
+                $('#confirmClearModal').modal('hide');
+            });
+    
+            // Evento al hacer clic en el papel
+            paper.on('blank:pointerclick', function(evt, x, y) {
+                if (currentAction === 'addState') {
+                    var stateLabel = 'q' + graph.getElements().length;
+                    var state = createState({ x: x - 25, y: y - 25 }, stateLabel);
+                }
+            });
+            
+            // Evento al hacer clic en un enlace
+            paper.on('link:pointerclick', function(linkView) {
+                if (currentAction === 'deleteElement') {
+                    linkView.model.remove();
+                } else {
+                    // Editar transición
+                    selectedElement = linkView.model;
+                    var currentLabel = selectedElement.labels()[0]?.attrs?.text?.text || '';
+                    $('#transition-symbol').val(currentLabel);
+                    $('#editTransitionModal').modal('show');
+                }
+            });
+    
+            // Guardar el nuevo símbolo
+            $('#save-transition-btn').on('click', function() {
+                var newSymbol = $('#transition-symbol').val().trim() || 'λ';
+                if (selectedElement) {
+                    selectedElement.label(0, {
+                        attrs: { text: { text: newSymbol } }
+                    });
+                    $('#editTransitionModal').modal('hide');
+                }
+            });
+            
+            // Evento al hacer clic en un elemento
+            paper.on('element:pointerclick', function(elementView, evt) {
+                var state = elementView.model;
+                if (currentAction === 'selectInitial') {
+                    setInitialState(state);
+                } else if (currentAction === 'toggleAccepting') {
+                    toggleAcceptingState(state);
+                } else if (currentAction === 'deleteElement') {
+                    // Si el estado eliminado es el inicial, reiniciar initialState
+                    if (initialState && state.id === initialState.id) {
+                        initialState = null;
+                    }
+                    // Si el estado eliminado es de aceptación, removerlo de acceptingStates
+                    acceptingStates = acceptingStates.filter(s => s.id !== state.id);
+                    state.remove();
+                } else if (currentAction === 'addTransition') {
+                    if (!transitionSource) {
+                        transitionSource = state;
+                        state.attr('body/stroke', 'blue');
+                    } else {
+                        var target = state;
+                        $('#addTransitionModal').modal('show');
+                        $('#save-new-transition-btn').off('click').on('click', function () {
+                            var symbol = $('#new-transition-symbol').val().trim() || 'λ';
+                            createTransition(transitionSource, target, symbol);
+                            transitionSource.attr('body/stroke', 'black');
+                            transitionSource = null;
+                            $('#new-transition-symbol').val('');
+                            $('#addTransitionModal').modal('hide');
+                            updateTransitions(); 
+                        });
+                    }
+                }
+            });
+    
+            // Evento al hacer clic en un enlace
+            paper.on('link:pointerclick', function(linkView, evt) {
+                if (currentAction === 'deleteElement') {
+                    linkView.model.remove();
+                }
+            });
+    
+            // Permitir mover elementos solo cuando está activa la opción "Mover"
+            paper.on('element:pointerdown', function(elementView, evt) {
+                if (currentAction !== 'moveElement') {
+                    evt.stopPropagation();
+                }
+            });
+    
+            // Función para crear un estado
+            function createState(position, label) {
+                var state = new joint.shapes.standard.Circle();
+                state.position(position.x, position.y);
+                state.resize(50, 50);
+                state.attr({
+                    body: {
+                        fill: 'white',
+                        stroke: 'black',
+                        cursor: 'pointer'
+                    },
+                    label: {
+                        text: label,
+                        fill: 'black',
+                        cursor: 'pointer'
+                    }
+                });
+                state.addTo(graph);
+                return state;
+            }
+    
+            // Función para crear una transición
+            function createTransition(source, target, symbol) {
+                var link = new joint.shapes.standard.Link();
+                link.source(source);
+                link.target(target);
+    
+                link.labels([{
+                    attrs: {
+                        text: { text: symbol, fill: 'black', fontSize: 14 }
+                    }
+                }]);
+    
+                link.addTo(graph);
+                updateTransitions(); // Actualizar transiciones
+            }
+        
+            // Función para actualizar las transiciones y evitar superposiciones
+            function updateTransitions() {
+                var links = graph.getLinks();
+    
+                // Agrupar enlaces por su par de nodos (incluyendo dirección)
+                var linkGroups = {};
+    
+                links.forEach(function(link) {
+                    if (link.id === 'initialLink') {
+                        return;
+                    }
+                    
+                    var sourceId = link.get('source').id;
+                    var targetId = link.get('target').id;
+    
+                    var key = sourceId + '-' + targetId;
+    
+                    if (!linkGroups[key]) {
+                        linkGroups[key] = [];
+                    }
+                    linkGroups[key].push(link);
+                });
+    
+                // Ajustar enlaces en cada grupo
+                Object.keys(linkGroups).forEach(function(key) {
+                    var group = linkGroups[key];
+                    var totalLinks = group.length;
+    
+                    group.forEach(function(link, index) {
+                        var sourceElement = link.getSourceElement();
+                        var targetElement = link.getTargetElement();
+    
+                        if (!sourceElement || !targetElement) {
+                            return;
+                        }
+                
+                        if (sourceElement.id === targetElement.id) {
+                            // Self-loop
+                            adjustSelfLoop(link, index, totalLinks);
+                        } else {
+                            adjustLink(link, index, totalLinks);
+                        }
+                    });
+                });
+            }
+    
+            // Función para ajustar self-loops
+            function adjustSelfLoop(link, index, totalLinks) {
+                var loopSpacing = 15; // Espacio entre self-loops
+                var source = link.getSourceElement();
+                var bbox = source.getBBox();
+                var loopRadius = 20 + index * loopSpacing;
+    
+                // Ajustar la posición del vértice para crear un bucle
+                var x = bbox.x + bbox.width / 2;
+                var y = bbox.y + bbox.height / 2 - loopRadius;
+    
+                link.set('vertices', [{ x: x, y: y }]);
+                link.router('normal');
+                link.connector('smooth');
+            }
+    
+            // Función para ajustar enlaces entre diferentes estados
+            function adjustLink(link, index, totalLinks) {
+                var sourceElement = link.getSourceElement();
+                var targetElement = link.getTargetElement();
+    
+                var sourceCenter = sourceElement.getBBox().center();
+                var targetCenter = targetElement.getBBox().center();
+    
+                var midPoint = {
+                    x: (sourceCenter.x + targetCenter.x) / 2,
+                    y: (sourceCenter.y + targetCenter.y) / 2
+                };
+    
+                var offset = (index - (totalLinks - 1) / 2) * 20; // Ajusta este valor según necesites
+    
+                // Calcular el vector normal
+                var dx = targetCenter.x - sourceCenter.x;
+                var dy = targetCenter.y - sourceCenter.y;
+                var length = Math.sqrt(dx * dx + dy * dy);
+                var nx = -dy / length;
+                var ny = dx / length;
+    
+                var vertex = {
+                    x: midPoint.x + nx * offset,
+                    y: midPoint.y + ny * offset
+                };
+    
+                link.set('vertices', [vertex]);
+                link.connector('smooth');
+            }
+    
+            // Llamar a updateTransitions cuando se mueven elementos
+            graph.on('change:position', function(cell) {
+                updateTransitions();
+            });
+    
+            // Llamar a updateTransitions cuando se elimina un enlace
+            graph.on('remove', function(cell) {
+                if (cell.isLink()) {
+                    updateTransitions();
+                }
+            });
+                
+            updateTransitions();
+            
+            // Función para establecer el estado inicial
+            function setInitialState(state) {
+                // Si el estado ya es el inicial, quitar el estado inicial
+                if (initialState && initialState.id === state.id) {
+                    var link = graph.getCell('initialLink');
+                    if (link) {
+                        link.remove();
+                    }
+                    initialState = null;
+                    return; // Salimos porque el estado ya no es inicial
+                }
+            
+                // Verificar si ya hay un estado inicial anterior y removerlo
+                if (initialState) {
+                    var oldLink = graph.getCell('initialLink');
+                    if (oldLink) {
+                        oldLink.remove();
+                    }
+                }
+    
+                initialState = state;
+    
+                // Crear una flecha que apunta al estado inicial
+                var initialLink = new joint.shapes.standard.Link({
+                    id: 'initialLink',
+                    source: { x: state.position().x - 50, y: state.position().y + 25 },
+                    target: { id: state.id },
+                    attrs: {
+                        line: {
+                            stroke: 'black',
+                            strokeWidth: 2,
+                            targetMarker: {
+                                'type': 'path',
+                                'd': 'M 10 -5 0 0 10 5 z'
+                            }
+                        }
+                    }
+                });
+                initialLink.addTo(graph);
+            }
+    
+            // Función para alternar el estado de aceptación
+            function toggleAcceptingState(state) {
+                var index = acceptingStates.findIndex(s => s.id === state.id);
+                if (index !== -1) {
+                    acceptingStates.splice(index, 1);
+                    state.attr('body/strokeWidth', 1); // Borde normal
+                } else {
+                    acceptingStates.push(state);
+                    state.attr('body/strokeWidth', 4); // Borde grueso
+                }
+            }
+    
+            // Actualizar la posición de la flecha inicial si se mueve el estado inicial
+            graph.on('change:position', function(cell) {
+                if (initialState && cell.id === initialState.id) {
+                    var link = graph.getCell('initialLink');
+                    if (link) {
+                        link.source({ x: cell.position().x - 50, y: cell.position().y + 25 });
+                    }
+                }
+    
+                // Actualizar la posición del círculo interno en estados de aceptación
+                var decorationId = cell.get('acceptingDecoration');
+                if (decorationId) {
+                    var decoration = graph.getCell(decorationId);
+                    if (decoration) {
+                        decoration.position(cell.position().x + 5, cell.position().y + 5);
+                    }
+                }
+            });
+            
+            // Función para procesar el autómata y enviar los datos al backend
+            document.getElementById('process-automata').addEventListener('click', function() {
+                // Obtener los elementos y enlaces del gráfico
+                var cells = graph.toJSON().cells;
+    
+                // Construir la representación del autómata
+                var automata = {
+                    states: [],
+                    transitions: [],
+                    initialState: null,
+                    acceptingStates: []
+                };
+    
+                // Mapear los IDs de los estados
+                var stateIdMap = {};
+                
+                cells.forEach(function(cell) {
+                    if (cell.type === 'standard.Circle') {
+                        // Ignorar los círculos internos de los estados de aceptación
+                        if (cell.acceptingDecoration) return;
+                
+                        automata.states.push(cell.id);
+                        stateIdMap[cell.id] = cell.attrs.label.text; // Acceder directamente a cell.attrs.label.text
+                
+                        // Verificar si es estado inicial
+                        if (initialState && cell.id === initialState.id) {
+                            automata.initialState = cell.id;
+                        }
+                
+                        // Verificar si es estado de aceptación
+                        if (acceptingStates.find(s => s.id === cell.id)) {
+                            automata.acceptingStates.push(cell.id);
+                        }
+                    } else if (cell.type === 'standard.Link') {
+                        // Ignorar el enlace de estado inicial
+                        if (cell.id === 'initialLink') return;
+                
+                        automata.transitions.push({
+                            source: cell.source.id, // Acceder directamente a cell.source.id
+                            target: cell.target.id, // Acceder directamente a cell.target.id
+                            symbol: cell.labels && cell.labels[0] && cell.labels[0].attrs.text.text ? cell.labels[0].attrs.text.text : 'λ'
+                        });
+                    }
+                });
+    
+                // Validar que exista un estado inicial
+                if (!automata.initialState) {
+                    alert('Debe seleccionar un estado inicial.');
+                    return;
+                }
+    
+                // Crear el payload completo
+                const payload = {
+                    automata: automata,
+                    stateIdMap: stateIdMap
+                };
+    
+                // Mostrar los datos en la consola antes de enviarlos
+                console.log('Datos enviados al backend:', JSON.stringify(payload, null, 2));
+    
+                // Enviar los datos al backend mediante POST
+                fetch("{% url 'draw_automata' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Respuesta del backend:', data);
+                    // Mostrar los resultados
+                    displayResults(data);
+                    // Almacenar los datos del autómata
+                    currentAutomataData = payload;
+                })
+                .catch(error => console.error('Error:', error));
+            });
+    
+            // Función para mostrar los resultados
+            function displayResults(data) {
+                // Mostrar la sección de resultados
+                document.getElementById('results-section').style.display = 'block';
+            
+                // Actualizar Variable Inicial
+                document.getElementById('initial-variable').innerText = data.initial_variable;
+            
+                // Actualizar No Terminales
+                document.getElementById('non-terminals').innerText = data.non_terminals.join(', ');
+            
+                // Actualizar Terminales
+                document.getElementById('terminals').innerText = data.terminals.join(', ');
+            
+                // Actualizar Producciones
+                let productionsHTML = '<ul class="list-unstyled mb-0">';
+                for (let variable in data.productions_grouped) {
+                    let productions = data.productions_grouped[variable];
+                    let productionStr = productions.join(' | ');
+                    productionsHTML += `<li>${variable} → ${productionStr}</li>`;
+                }
+                productionsHTML += '</ul>';
+                document.getElementById('productions').innerHTML = productionsHTML;
+            
+                // Actualizar Tipo de Gramática
+                document.getElementById('grammar-type').innerText = data.grammar_type;
+            
+                // Actualizar Descripción Formal del Lenguaje y renderizar con MathJax
+                {% comment %}document.getElementById('language-description').innerHTML = `\\[ ${data.language_description} \\]`;
+                if (window.MathJax) {
+                    MathJax.typesetPromise([document.getElementById('language-description')]);
+                }{% endcomment %}
+            
+                // Limpiar resultados anteriores de pruebas de cadenas
+                document.getElementById('test-results').innerHTML = '';
+            
+                // Mostrar la sección de probar cadenas
+                displayTestStringsSection();
+            }
+    
+            // Evento para probar cadenas
+            document.getElementById('test-string-btn').addEventListener('click', function() {
+                let testString = document.getElementById('test-string-input').value.trim();
+    
+                if (testString === '') {
+                    alert('Ingrese una cadena para probar.');
+                    return;
+                }
+    
+                if (!currentAutomataData) {
+                    alert('Debe procesar el autómata antes de probar cadenas.');
+                    return;
+                }
+    
+                // Enviar cadena de prueba y datos del autómata al backend
+                let testPayload = {
+                    'test_strings': testString,
+                    'automata': currentAutomataData.automata,
+                    'stateIdMap': currentAutomataData.stateIdMap
+                };
+    
+                fetch("{% url 'test_strings' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(testPayload)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Mostrar resultado de la prueba
+                    let testResultsDiv = document.getElementById('test-results');
+                    let resultHTML = `<p>Cadena: "${testString}" - ${data.result ? '<span class="text-success">Aceptada</span>' : '<span class="text-danger">Rechazada</span>'}</p>`;
+                    testResultsDiv.innerHTML += resultHTML;
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+            
+    // Mostrar la sección de probar cadenas después de procesar el autómata
+    function displayTestStringsSection() {
+        document.getElementById('test-strings-section').style.display = 'block';
+    }
+
+    // Manejo de la Tabla Dinámica para Cadenas de Prueba
+    const addRowButton = document.getElementById('add-row');
+    const tableBody = document.querySelector('#test-strings-table tbody');
+
+    // Función para agregar una nueva fila
+    addRowButton.addEventListener('click', function() {
+        const newRow = document.createElement('tr');
+
+        // Celda para el input de la cadena
+        const inputCell = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'test_strings';
+        input.classList.add('form-control', 'text-center');
+        input.placeholder = 'Ingrese una cadena...';
+        input.required = true;
+        inputCell.appendChild(input);
+        newRow.appendChild(inputCell);
+
+        // Celda para el resultado (vacío inicialmente)
+        const resultCell = document.createElement('td');
+        resultCell.classList.add('text-center');
+        newRow.appendChild(resultCell);
+
+        // Celda para el botón de eliminar
+        const actionCell = document.createElement('td');
+        actionCell.classList.add('text-center');
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.classList.add('btn', 'btn-outline-danger', 'btn-sm', 'remove-row');
+        removeButton.setAttribute('data-bs-toggle', 'tooltip');
+        removeButton.setAttribute('data-bs-placement', 'top');
+        removeButton.setAttribute('title', 'Eliminar esta fila');
+        removeButton.innerHTML = '<i class="bi bi-trash"></i>';
+        actionCell.appendChild(removeButton);
+        newRow.appendChild(actionCell);
+
+        // Insertar la nueva fila antes de la fila del botón "Agregar Fila"
+        const addRowContainer = document.getElementById('add-row-container');
+        tableBody.insertBefore(newRow, addRowContainer);
+
+        // Re-inicializar Tooltips
+        var tooltipTriggerList = [].slice.call(newRow.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+
+    // Función para eliminar una fila
+    tableBody.addEventListener('click', function(event) {
+        if (event.target && event.target.closest('.remove-row')) {
+            const row = event.target.closest('tr');
+            row.remove();
+        }
+    });
+
+    // Manejo del envío de las cadenas de prueba
+    document.getElementById('submit-test-strings').addEventListener('click', function() {
+        let testStringsInputs = document.querySelectorAll('input[name="test_strings"]');
+        let testStrings = [];
+        testStringsInputs.forEach(input => {
+            let value = input.value.trim();
+            if (value !== '') {
+                testStrings.push(value);
+            }
+        });
+
+        if (testStrings.length === 0) {
+            alert('Ingrese al menos una cadena para probar.');
+            return;
+        }
+
+        if (!currentAutomataData) {
+            alert('Debe procesar el autómata antes de probar cadenas.');
+            return;
+        }
+
+        // Preparar payload
+        let payload = {
+            'test_strings': testStrings,
+            'automata': currentAutomataData.automata,
+            'stateIdMap': currentAutomataData.stateIdMap
+        };
+
+        // Enviar las cadenas de prueba al backend
+        fetch("{% url 'test_strings' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Mostrar resultados en la tabla
+            const rows = tableBody.querySelectorAll('tr');
+            let index = 0;
+            rows.forEach(row => {
+                const input = row.querySelector('input[name="test_strings"]');
+                const resultCell = row.cells[1];
+                if (input) {
+                    const value = input.value.trim();
+                    if (value !== '') {
+                        const isAccepted = data.results[index];
+                        resultCell.innerHTML = isAccepted ? '<span class="text-success fw-bold">Aceptada</span>' : '<span class="text-danger fw-bold">Rechazada</span>';
+                        index++;
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error:', error));
+    });
+    </script>
+    {% endblock %}
+</main>
 {% endblock %}

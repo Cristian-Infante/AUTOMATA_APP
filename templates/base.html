@@ -24,7 +24,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{% url 'index' %}">Automata APP</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -47,17 +47,13 @@
     <!-- Contenido de la página -->
     <main class="flex-grow-1">
         {% block content %}
-        <!-- Simulación de contenido largo para probar el scroll -->
-        <div style="height: 1500px;">
-            <h1 class="text-center mt-5">Contenido de prueba</h1>
-        </div>
         {% endblock %}
     </main>
 
     <!-- Pie de página -->
-    <footer class="text-center py-4 mt-auto bg-light">
+    {% comment %}<footer class="text-center py-4 mt-auto bg-light">
         <p>&copy; {{ current_year }} Automata APP.</p>
-    </footer>
+    </footer>{% endcomment %}
 
     <!-- Botón "Volver arriba" -->
     <a href="#" id="back-to-top" class="btn btn-outline-primary position-fixed bottom-0 end-0 m-4 align-items-center justify-content-center"
@@ -83,7 +79,6 @@
 
             // Mostrar u ocultar el botón según el scroll
             window.addEventListener('scroll', () => {
-                console.log('ScrollY:', window.scrollY); // Mostrar el valor del scroll para depurar
                 if (window.scrollY > 200) { // Ajusta este valor según el contenido
                     backToTopButton.style.display = 'flex'; // Mostrar el botón
                 } else {

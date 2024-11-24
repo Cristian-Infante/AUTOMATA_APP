@@ -425,3 +425,4 @@ def determine_grammar_type(N, T, P):
     else:
         return "Tipo 0 (Gramática No Restringida)"
 
+

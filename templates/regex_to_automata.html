@@ -3,7 +3,7 @@
 {% block title %}Regex a Autómatas{% endblock %}
 
 {% block content %}
-    <div class="container my-5">
+<div class="container my-5 d-flex flex-column">
         <h1 class="text-center mb-4 text-primary">Conversor de Regex a Autómatas</h1>
 
         <!-- Formulario de Entrada de Regex -->
@@ -30,11 +30,11 @@
         <div class="grammar-container my-5 p-4 bg-light rounded shadow-sm">
             <h2 class="text-center mb-4 text-primary">Gramática Regular Correspondiente</h2>
             <div class="table-responsive">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped text-center align-middle">
                     <tbody>
                         <!-- Símbolo Inicial -->
                         <tr>
-                            <td>
+                            <td class="fw-bold align-middle">
                                 <strong>
                                     <span data-bs-toggle="tooltip" data-bs-placement="top" title="Variable de inicio de la gramática">
                                         Variable Inicial (S)
@@ -45,7 +45,7 @@
                         </tr>
                         <!-- No Terminales -->
                         <tr>
-                            <td>
+                            <td class="fw-bold align-middle">
                                 <strong>
                                     <span data-bs-toggle="tooltip" data-bs-placement="top" title="Conjunto de símbolos no terminales de la gramática">
                                         Símbolos No Terminales (N)
@@ -56,7 +56,7 @@
                         </tr>
                         <!-- Terminales -->
                         <tr>
-                            <td>
+                            <td class="fw-bold align-middle">
                                 <strong>
                                     <span data-bs-toggle="tooltip" data-bs-placement="top" title="Conjunto de símbolos terminales (alfabeto) de la gramática">
                                         Símbolos Terminales (T)
@@ -67,24 +67,24 @@
                         </tr>
                         <!-- Producciones -->
                         <tr>
-                            <td>
+                            <td class="fw-bold align-middle">
                                 <strong>
                                     <span data-bs-toggle="tooltip" data-bs-placement="top" title="Reglas de producción que definen cómo los símbolos se pueden transformar">
                                         Producciones (P)
                                     </span>
                                 </strong>
                             </td>
-                            <td class="text-center">
+                            <td class="align-middle">
                                 <ul class="list-unstyled mb-0">
                                     {% for variable, productions in productions_grouped.items %}
-                                    <li><strong>{{ variable }}</strong> → {{ productions|join:" | " }}</li>
+                                    <li>{{ variable }} → {{ productions|join:" | " }}</li>
                                     {% endfor %}
                                 </ul>
                             </td>
                         </tr>
                         <!-- Tipo de Gramática -->
                         <tr>
-                            <td>
+                            <td class="fw-bold align-middle">
                                 <strong>
                                     <span data-bs-toggle="tooltip" data-bs-placement="top" title="Tipo de la gramática según la jerarquía de Chomsky">
                                         Tipo de Gramática
@@ -97,7 +97,7 @@
                         </tr>
                         <!-- Descripción Formal del Lenguaje -->
                         <tr>
-                            <td>
+                            <td class="fw-bold align-middle">
                                 <strong>
                                     <span data-bs-toggle="tooltip" data-bs-placement="top" title="Descripción matemática del lenguaje aceptado por la expresión regular">
                                         Descripción Formal del Lenguaje
@@ -118,18 +118,23 @@
         {% if automata_list %}
         <div class="results">
             {% for automata_title, automata_graph, automata_id in automata_list %}
-            <div class="automata-container">
-                <h3 class="text-center mb-3 text-secondary">
-                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="{% if automata_title == 'AFND-λ' %}Autómata Finito No Determinista con Transiciones Lambda{% elif automata_title == 'AFND' %}Autómata Finito No Determinista{% elif automata_title == 'AFD' %}Autómata Finito Determinista{% endif %}">
-                        {{ automata_title }}
-                    </span>
-                </h3>
-                <button class="btn btn-outline-secondary center-button" onclick="resetZoom('{{ automata_id }}')">
-                    Restablecer Zoom
-                </button>
-                <div class="d-flex justify-content-center">
-                    <div id="{{ automata_id }}" class="zoomable">
-                        <img src="data:image/png;base64,{{ automata_graph }}" alt="{{ automata_title }}">
+            <div class="card mb-4 shadow-sm" style="max-width: 800px; margin: 0 auto;">
+                <div class="card-header text-center">
+                    <h3 class="text-secondary mb-0">
+                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="{% if automata_title == 'AFND-λ' %}Autómata Finito No Determinista con Transiciones Lambda{% elif automata_title == 'AFND' %}Autómata Finito No Determinista{% elif automata_title == 'AFD' %}Autómata Finito Determinista{% endif %}">
+                            {{ automata_title }}
+                        </span>
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-column align-items-center">
+                        <!-- Contenedor de la imagen -->
+                        <div id="{{ automata_id }}" class="zoomable-container mb-3  align-items-center justify-content-center" style="width: 100%; height: 400px; overflow: hidden; position: relative;">
+                            <img src="data:image/png;base64,{{ automata_graph }}" alt="{{ automata_title }}" style="display: block; max-width: 100%; max-height: 100%; position: absolute; left: 40%; transform: translate(-50%, -50%);">
+                        </div>
+                        <button class="btn btn-outline-secondary mt-2" onclick="resetZoom('{{ automata_id }}')">
+                            Restablecer Zoom
+                        </button>
                     </div>
                 </div>
             </div>
@@ -211,11 +216,29 @@
         {% endif %}
     </div>
 
-    <!-- Bootstrap Bundle con Popper -->
+    <!-- Estilos adicionales -->
+    <style>
+        .zoomable-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+        .zoomable {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-origin: center center;
+        }
+        .zoomable img {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+
+    <!-- Scripts necesarios -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Panzoom JS -->
     <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.4.0/dist/panzoom.min.js"></script>
-    <!-- MathJax para renderizar LaTeX -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
     <script>
         window.MathJax = {
             tex: {
@@ -226,33 +249,35 @@
                 fontCache: 'global'
             }
         };
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
-    <script>
+    
         // Inicializar Tooltips de Bootstrap
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
-
-        // Hacer zoom y mover las imágenes con Panzoom (si existen)
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    
+        // Configuración de Panzoom
         const panzoomInstances = {};
-
+    
         {% if automata_list %}
         const automataIds = [{% for _, _, automata_id in automata_list %}'{{ automata_id }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+    
         automataIds.forEach(id => {
-            const elem = document.querySelector(`#${id} img`);
-            const panzoomInstance = Panzoom(elem, {
+            const elem = document.getElementById(id);
+            const panzoomInstance = Panzoom(elem.querySelector('img'), {
                 maxScale: 5,
                 minScale: 1,
-                contain: 'outside'
+                contain: 'automatic',
+                startX: 0,
+                startY: 0,
+                center: true
             });
             panzoomInstances[id] = panzoomInstance;
-
+    
             // Habilitar eventos de rueda del ratón
-            elem.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
+            elem.addEventListener('wheel', panzoomInstance.zoomWithWheel);
         });
-
+    
         function resetZoom(id) {
             const panzoomInstance = panzoomInstances[id];
             if (panzoomInstance) {
